@@ -174,11 +174,11 @@
                         Content="Підтвердити вибір"
                         Style="{StaticResource BottomActionButtonStyle}"
                         Click="ConfirmSelectionButton_Click"
-                        Margin="619,-3,113,-3" Foreground="Black"/>
+                        Margin="583,-3,126,-3" Foreground="Black"/>
                 <Button
                         Content="Скасувати"
                         Style="{StaticResource BottomActionButtonStyle}"
-                        Click="CancelButton_Click" Margin="780,-3,0,-3" Foreground="Black"/>
+                        Click="CancelButton_Click" Margin="770,-3,0,-3" Foreground="Black"/>
             </Grid>
         </Border>
     </Grid>

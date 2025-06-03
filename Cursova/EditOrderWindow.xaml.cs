@@ -11,7 +11,7 @@ namespace Cursova
     public partial class EditOrderWindow : Window
     {
         private Order _currentOrder;
-        
+
         private Order _originalOrderCopy;
 
         public EditOrderWindow(Order orderToEdit)
@@ -32,7 +32,7 @@ namespace Cursova
                 OrderId = original.OrderId,
                 Status = original.Status,
             };
-            
+
             foreach (var item in original.Items)
             {
                 copy.Items.Add(new OrderItem(item.Item, item.Quantity, item.Notes));
@@ -145,7 +145,7 @@ namespace Cursova
                 };
 
                 quantityTextBox.PreviewTextInput += NumericTextBox_PreviewTextInput;
-              
+
                 quantityTextBox.LostFocus += QuantityTextBox_LostFocus;
                 quantityControlPanel.Children.Add(quantityTextBox);
 
@@ -286,18 +286,20 @@ namespace Cursova
         {
             MenuWindow menuWindow = new MenuWindow(_currentOrder, this);
             menuWindow.ShowDialog();
+
+
         }
 
         private void SaveChangesButton_Click(object sender, RoutedEventArgs e)
         {
-            
+
             DialogResult = true;
             this.Close();
         }
 
         private void CancelButton_Click(object sender, RoutedEventArgs e)
         {
-            
+
             _currentOrder.Items.Clear();
             foreach (var item in _originalOrderCopy.Items)
             {

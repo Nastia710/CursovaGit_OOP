@@ -14,7 +14,7 @@ namespace Cursova
         private Order _currentOrderReference;
         private EditOrderWindow _parentEditOrderWindow;
         private bool _isNewOrderMode;
-        
+
         public List<OrderItem> SelectedOrderItems { get; private set; } = new List<OrderItem>();
 
         public MenuWindow()
@@ -85,6 +85,7 @@ namespace Cursova
 
             TextBlock descriptionWeightTextBlock = new TextBlock
             {
+
                 Text = $"{item.Description} ({item.WeightGrams}г)",
                 FontSize = 14,
                 Foreground = Brushes.Gray,
@@ -124,6 +125,8 @@ namespace Cursova
                     Style = (Style)FindResource("AddButtonMenu"),
                     Tag = item,
                     Foreground= Brushes.Black,
+                    Width = 80,
+                    Height = 40
                 };
                 addButton.Click += AddToOrderButton_Click;
                 controlPanel.Children.Add(addButton);
@@ -164,7 +167,8 @@ namespace Cursova
                     Style = (Style)FindResource("AddButtonMenu"),
                     Background = Brushes.Red,
                     Tag = existingOrderItem,
-                    Margin = new Thickness(5, 0, 0, 0)
+                    Width = 80,
+                    Height = 40
                 };
                 removeButton.Click += RemoveItemFromOrderButton_Click;
                 controlPanel.Children.Add(removeButton);

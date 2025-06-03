@@ -19,7 +19,7 @@ namespace Cursova
         {
             Allergens = new List<string>();
         }
-        
+
         public MenuItemForOrder(string name, decimal price, string description, double weightGrams, List<string> allergens = null)
         {
             Name = name;

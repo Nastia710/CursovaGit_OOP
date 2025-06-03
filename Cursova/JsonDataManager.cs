@@ -58,4 +58,4 @@ namespace Cursova
             return JsonSerializer.Deserialize<Dictionary<int, List<Order>>>(json, _jsonOptions);
         }
     }
-} 
+}

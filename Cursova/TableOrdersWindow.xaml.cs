@@ -16,7 +16,6 @@ namespace Cursova
         Ready,
         Completed
     }
-
     public class OrderItem
     {
         public MenuItemForOrder Item { get; set; }
@@ -24,23 +23,20 @@ namespace Cursova
         public string Notes { get; set; }
 
         [JsonConstructor]
-        public OrderItem()
+        /*public OrderItem()
         {
-        }  
-
+        }*/
         public OrderItem(MenuItemForOrder item, int quantity, string notes = "")
         {
             Item = item;
             Quantity = quantity;
             Notes = notes;
         }
-
         public decimal TotalPrice => Item.Price * Quantity;
     }
-
     public class Order
     {
-        private static int _nextOrderId = 1;
+        private static int _nextOrderId = 0;
         public int OrderId { get; set; }
         public int TableNumber { get; set; }
         public OrderStatus Status { get; set; }
@@ -48,19 +44,17 @@ namespace Cursova
         public decimal TotalCost { get; set; }
 
         [JsonConstructor]
-        public Order()
+        /*public Order()
         {
             Items = new List<OrderItem>();
-        }
-
+        }*/
         public Order(int tableNumber)
         {
-            OrderId = _nextOrderId;
+            OrderId = _nextOrderId++;
             TableNumber = tableNumber;
             Status = OrderStatus.AwaitingConfirmation;
             Items = new List<OrderItem>();
             CalculateTotalCost();
-            _nextOrderId++;
         }
 
         public void AddItem(OrderItem item)
@@ -94,7 +88,7 @@ namespace Cursova
             _tableNumber = tableNumber;
             _jsonDataManager = new JsonDataManager();
             TableNumberTextBlock.Text = $"Замовлення для столика #{_tableNumber}";
-            
+
             if (_allTableOrders == null)
             {
                 _allTableOrders = _jsonDataManager.LoadOrders();
@@ -142,7 +136,7 @@ namespace Cursova
             {
                 TextBlock noOrdersText = new TextBlock
                 {
-                    Text = "Немає активних замовлень",
+                    Text = "Немає замовлень для цього столика",
                     FontSize = 16,
                     HorizontalAlignment = HorizontalAlignment.Center,
                     Margin = new Thickness(0, 20, 0, 0)
@@ -224,7 +218,6 @@ namespace Cursova
                 OrdersStackPanel.Children.Add(orderBorder);
             }
         }
-
         private string GetOrderStatusDisplayName(OrderStatus status)
         {
             switch (status)

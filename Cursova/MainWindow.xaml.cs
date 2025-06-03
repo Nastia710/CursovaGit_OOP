@@ -29,7 +29,7 @@ namespace Cursova
                     FontSize = 18,
                     FontWeight = FontWeights.Bold,
                     Background = new SolidColorBrush(Color.FromRgb(137, 192, 249)),
-                    Foreground = Brushes.Black,
+                    Foreground = Brushes.White,
                     Cursor = Cursors.Hand,
                     Style = (Style)FindResource("TableButtonStyle")
                 };

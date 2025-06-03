@@ -128,31 +128,12 @@
         </Grid.RowDefinitions>
 
         <Border Grid.Row="0" Background="#FFD5E8FF" Padding="10">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
-                <TextBlock Text="Меню"
-                           FontSize="24"
-                           FontWeight="Bold"
-                           HorizontalAlignment="Center"
-                           VerticalAlignment="Center"
-                           Foreground="Black" Width="803" TextAlignment="Center"/>
-
-                <Button Grid.Column="1"
-                        Content="..."
-                        FontSize="24"
-                        FontWeight="Bold"
-                        Width="40" Height="40"
-                        Background="Transparent"
-                        Foreground="Gray"
-                        BorderThickness="0"
-                        Cursor="Hand"
-                        Click="MenuManagementButton_Click"
-                        Style="{StaticResource QuantityButtonStyle}"
-                        Margin="10,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Center"/>
-            </Grid>
+            <TextBlock Text="Меню"
+                       FontSize="24"
+                       FontWeight="Bold"
+                       HorizontalAlignment="Center"
+                       VerticalAlignment="Center"
+                       Foreground="Black"/>
         </Border>
 
         <TabControl Grid.Row="1" Margin="10">

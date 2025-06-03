@@ -1,7 +1,11 @@
 ﻿using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace Cursova
 {
+    [JsonDerivedType(typeof(Dish), typeDiscriminator: "Dish")]
+    [JsonDerivedType(typeof(Drink), typeDiscriminator: "Drink")]
+    [JsonDerivedType(typeof(Dessert), typeDiscriminator: "Dessert")]
     public abstract class MenuItemForOrder
     {
         public string Name { get; set; }
@@ -10,6 +14,11 @@ namespace Cursova
         public double WeightGrams { get; set; }
         public List<string> Allergens { get; set; } = new List<string>();
 
+        [JsonConstructor]
+        public MenuItemForOrder()
+        {
+            Allergens = new List<string>();
+        }
         
         public MenuItemForOrder(string name, decimal price, string description, double weightGrams, List<string> allergens = null)
         {

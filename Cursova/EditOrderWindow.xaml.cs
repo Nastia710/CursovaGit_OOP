@@ -177,7 +177,9 @@ namespace Cursova
                     Content = "Видалити",
                     Style = (Style)FindResource("RemoveItemButtonStyle"),
                     Tag = orderItem,
-                    VerticalAlignment = VerticalAlignment.Center
+                    VerticalAlignment = VerticalAlignment.Center,
+                    Margin = new Thickness(5),
+                    Foreground = Brushes.White,
                 };
                 removeButton.Click += RemoveItemButton_Click;
                 Grid.SetColumn(removeButton, 3);
@@ -284,8 +286,6 @@ namespace Cursova
         {
             MenuWindow menuWindow = new MenuWindow(_currentOrder, this);
             menuWindow.ShowDialog();
-
-            
         }
 
         private void SaveChangesButton_Click(object sender, RoutedEventArgs e)

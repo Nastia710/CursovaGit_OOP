@@ -68,7 +68,7 @@
             </StackPanel>
         </ScrollViewer>
 
-        <Border Grid.Row="1" Background="#FFD5E8FF" Padding="10" Margin="0,569,0,0" Grid.RowSpan="2">
+        <Border Grid.Row="1" Background="#FFD5E8FF" Padding="10" Margin="0,555,0,0">
             <Button Content="Створити нове замовлення"
                     HorizontalAlignment="Center"
                     Padding="10,5"

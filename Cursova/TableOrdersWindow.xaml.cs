@@ -4,6 +4,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Text.Json.Serialization;
 
 namespace Cursova
 {
@@ -15,39 +16,19 @@ namespace Cursova
         Ready,
         Completed
     }
-    public class MenuItemWorking
-    {
-        public string Name { get; set; }
-        public decimal Price { get; set; }
-        public string Description { get; set; }
-        public double WeightGrams { get; set; }
-        public List<string> Allergens { get; set; } = new List<string>();
-
-        public MenuItemWorking(string name, decimal price, string description, double weightGrams, List<string> allergens = null)
-        {
-            Name = name;
-            Price = price;
-            Description = description;
-            WeightGrams = weightGrams;
-            if (allergens != null)
-            {
-                Allergens = allergens;
-            }
-        }
-
-        public override string ToString()
-        {
-            return $"{Name} ({WeightGrams}г) - {Price:C}";
-        }
-    }
 
     public class OrderItem
     {
-        public MenuItemWorking Item { get; set; }
+        public MenuItemForOrder Item { get; set; }
         public int Quantity { get; set; }
         public string Notes { get; set; }
 
-        public OrderItem(MenuItemWorking item, int quantity, string notes = "")
+        [JsonConstructor]
+        public OrderItem()
+        {
+        }  
+
+        public OrderItem(MenuItemForOrder item, int quantity, string notes = "")
         {
             Item = item;
             Quantity = quantity;
@@ -63,15 +44,23 @@ namespace Cursova
         public int OrderId { get; set; }
         public int TableNumber { get; set; }
         public OrderStatus Status { get; set; }
-        public List<OrderItem> Items { get; set; } = new List<OrderItem>();
+        public List<OrderItem> Items { get; set; }
         public decimal TotalCost { get; set; }
+
+        [JsonConstructor]
+        public Order()
+        {
+            Items = new List<OrderItem>();
+        }
 
         public Order(int tableNumber)
         {
-            OrderId = _nextOrderId++;
+            OrderId = _nextOrderId;
             TableNumber = tableNumber;
             Status = OrderStatus.AwaitingConfirmation;
+            Items = new List<OrderItem>();
             CalculateTotalCost();
+            _nextOrderId++;
         }
 
         public void AddItem(OrderItem item)
@@ -92,49 +81,75 @@ namespace Cursova
         }
     }
 
-
     public partial class TableOrdersWindow : Window
     {
         private int _tableNumber;
         private List<Order> _orders = new List<Order>();
+        private readonly JsonDataManager _jsonDataManager;
+        private static Dictionary<int, List<Order>> _allTableOrders;
 
         public TableOrdersWindow(int tableNumber)
         {
             InitializeComponent();
             _tableNumber = tableNumber;
+            _jsonDataManager = new JsonDataManager();
             TableNumberTextBlock.Text = $"Замовлення для столика #{_tableNumber}";
-            LoadOrdersForTable();
+            
+            if (_allTableOrders == null)
+            {
+                _allTableOrders = _jsonDataManager.LoadOrders();
+            }
+
+            if (_allTableOrders.ContainsKey(_tableNumber))
+            {
+                _orders = _allTableOrders[_tableNumber];
+            }
+            else
+            {
+                _allTableOrders[_tableNumber] = _orders;
+            }
+
             DisplayOrders();
         }
 
-        private void LoadOrdersForTable()
+        private void SaveOrders()
         {
-            // !from file!
-            _orders.Add(new Order(_tableNumber)
-            {
-                Status = OrderStatus.Confirmed,
-                Items = new List<OrderItem>
-                {
-                    new OrderItem(new MenuItemWorking("Борщ Український", 85.00m, "Традиційний борщ", 350, new List<string>{"Буряк"}), 1),
-                    new OrderItem(new MenuItemWorking("Узвар", 25.00m, "Компот із сухофруктів", 200), 2)
-                }
-            });
-            _orders[0].CalculateTotalCost();
+            _allTableOrders[_tableNumber] = _orders;
+            _jsonDataManager.SaveOrders(_allTableOrders);
+        }
 
-            _orders.Add(new Order(_tableNumber)
+        private void CreateNewOrderButton_Click(object sender, RoutedEventArgs e)
+        {
+            MenuWindow menuWindow = new MenuWindow();
+            if (menuWindow.ShowDialog() == true)
             {
-                Status = OrderStatus.Preparing,
-                Items = new List<OrderItem>
+                Order newOrder = new Order(_tableNumber);
+                foreach (var item in menuWindow.SelectedOrderItems)
                 {
-                    new OrderItem(new MenuItemWorking("М'ясний салат", 120.00m, "Салат з куркою", 250), 1)
+                    newOrder.AddItem(item);
                 }
-            });
-            _orders[1].CalculateTotalCost();
+                _orders.Add(newOrder);
+                SaveOrders();
+                DisplayOrders();
+            }
         }
 
         private void DisplayOrders()
         {
-            OrdersStackPanel.Children.Clear(); 
+            OrdersStackPanel.Children.Clear();
+
+            if (_orders.Count == 0)
+            {
+                TextBlock noOrdersText = new TextBlock
+                {
+                    Text = "Немає активних замовлень",
+                    FontSize = 16,
+                    HorizontalAlignment = HorizontalAlignment.Center,
+                    Margin = new Thickness(0, 20, 0, 0)
+                };
+                OrdersStackPanel.Children.Add(noOrdersText);
+                return;
+            }
 
             foreach (var order in _orders)
             {
@@ -152,12 +167,12 @@ namespace Cursova
                 orderGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
                 orderGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
                 orderGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
-                orderGrid.ColumnDefinitions.Add(new ColumnDefinition { Width =GridLength.Auto });
+                orderGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
                 orderGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
 
                 TextBlock statusTextBlock = new TextBlock
                 {
-                    Text = $"Статус: {GetOrderStatusDisplayName(order.Status)}",
+                    Text = $"Замовлення №{order.OrderId} - {GetOrderStatusDisplayName(order.Status)}",
                     FontSize = 16,
                     FontWeight = FontWeights.SemiBold,
                     Margin = new Thickness(0, 0, 0, 5)
@@ -189,7 +204,6 @@ namespace Cursova
                 Grid.SetColumnSpan(totalCostTextBlock, 2);
                 orderGrid.Children.Add(totalCostTextBlock);
 
-                // Список позицій замовлення
                 StackPanel itemsStackPanel = new StackPanel();
                 foreach (var item in order.Items)
                 {
@@ -210,6 +224,7 @@ namespace Cursova
                 OrdersStackPanel.Children.Add(orderBorder);
             }
         }
+
         private string GetOrderStatusDisplayName(OrderStatus status)
         {
             switch (status)
@@ -246,7 +261,6 @@ namespace Cursova
                 deleteOrderMenuItem.Click += (s, ev) => DeleteOrder(clickedOrder);
                 contextMenu.Items.Add(deleteOrderMenuItem);
 
-
                 contextMenu.IsOpen = true;
             }
         }
@@ -260,11 +274,11 @@ namespace Cursova
             if (result == MessageBoxResult.Yes)
             {
                 _orders.Remove(orderToDelete);
+                SaveOrders();
                 DisplayOrders();
                 MessageBox.Show($"Замовлення №{orderToDelete.OrderId} видалено.");
             }
         }
-
 
         private void ShowChangeStatusDialog(Order order)
         {
@@ -302,7 +316,7 @@ namespace Cursova
             Button confirmButton = new Button
             {
                 Content = "Підтвердити",
-                Padding = new Thickness(10, 5, 0,0),
+                Padding = new Thickness(10, 5, 0, 0),
                 Margin = new Thickness(0, 0, 10, 0)
             };
             confirmButton.Click += (s, e) =>
@@ -315,6 +329,7 @@ namespace Cursova
                 if (result == MessageBoxResult.Yes)
                 {
                     order.Status = newStatus;
+                    SaveOrders();
                     DisplayOrders();
                     changeStatusDialog.Close();
                 }
@@ -334,7 +349,6 @@ namespace Cursova
             changeStatusDialog.ShowDialog();
         }
 
-
         private void EditOrder(Order order)
         {
             EditOrderWindow editWindow = new EditOrderWindow(order);
@@ -342,14 +356,9 @@ namespace Cursova
 
             if (dialogResult == true)
             {
-                order.CalculateTotalCost();
+                SaveOrders();
                 DisplayOrders();
             }
-        }
-
-        private void CreateNewOrderButton_Click(object sender, RoutedEventArgs e)
-        {
-            // ...
         }
     }
 }

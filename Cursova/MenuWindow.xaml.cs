@@ -57,6 +57,7 @@ namespace Cursova
                 DessertsStackPanel.Children.Add(CreateMenuItemUI(dessert));
             }
         }
+
         private UIElement CreateMenuItemUI(MenuItemForOrder item)
         {
             Border itemBorder = new Border
@@ -121,7 +122,8 @@ namespace Cursova
                 {
                     Content = "Додати",
                     Style = (Style)FindResource("AddButtonMenu"),
-                    Tag = item
+                    Tag = item,
+                    Foreground= Brushes.Black,
                 };
                 addButton.Click += AddToOrderButton_Click;
                 controlPanel.Children.Add(addButton);
@@ -178,7 +180,7 @@ namespace Cursova
         private void AddToOrderButton_Click(object sender, RoutedEventArgs e)
         {
             Button button = sender as Button;
-            MenuItemWorking selectedMenuItem = button.Tag as MenuItemWorking;
+            MenuItemForOrder selectedMenuItem = button.Tag as MenuItemForOrder;
 
             if (selectedMenuItem != null)
             {
@@ -279,10 +281,6 @@ namespace Cursova
             }
         }
 
-        /*private void QuantityTextBox_TextChanged(object sender, TextChangedEventArgs e)
-        {
-        }*/
-
         private void RemoveItemFromOrderButton_Click(object sender, RoutedEventArgs e)
         {
             Button button = sender as Button;
@@ -322,84 +320,6 @@ namespace Cursova
         {
             DialogResult = false;
             this.Close();
-        }
-
-        private void MenuManagementButton_Click(object sender, RoutedEventArgs e)
-        {
-            Button button = sender as Button;
-            ContextMenu contextMenu = new ContextMenu();
-            contextMenu.PlacementTarget = button;
-            contextMenu.Placement = System.Windows.Controls.Primitives.PlacementMode.Bottom;
-
-            MenuItem addMenuItem = new MenuItem { Header = "Додати нову страву" };
-            addMenuItem.Click += (s, ev) => OpenDishEditAddWindow(null);
-            contextMenu.Items.Add(addMenuItem);
-
-            MenuItem editMenuItem = new MenuItem { Header = "Редагувати страву" };
-            editMenuItem.Click += (s, ev) => ShowSelectDishToEditDialog();
-            contextMenu.Items.Add(editMenuItem);
-
-            MenuItem deleteMenuItem = new MenuItem { Header = "Видалити страву" };
-            deleteMenuItem.Click += (s, ev) => ShowSelectDishToDeleteDialog();
-            contextMenu.Items.Add(deleteMenuItem);
-
-            contextMenu.IsOpen = true;
-        }
-
-        private void OpenDishEditAddWindow(MenuItemForOrder itemToEdit)
-        {
-            DishEditAddWindow editAddWindow = new DishEditAddWindow(itemToEdit, _menuManager);
-            bool? result = editAddWindow.ShowDialog();
-            if (result == true)
-            {
-                LoadMenuToUI();
-                _parentEditOrderWindow?.DisplayOrderItems();
-            }
-        }
-
-        private void ShowSelectDishToEditDialog()
-        {
-            if (_menuManager.AllMenuItems.Any())
-            {
-                OpenDishEditAddWindow(_menuManager.AllMenuItems.First());
-            }
-            else
-            {
-                MessageBox.Show("Меню порожнє. Немає страв для редагування.", "Помилка", MessageBoxButton.OK, MessageBoxImage.Information);
-            }
-        }
-
-        private void ShowSelectDishToDeleteDialog()
-        {
-            if (_menuManager.AllMenuItems.Any())
-            {
-                MenuItemForOrder itemToDelete = _menuManager.AllMenuItems.FirstOrDefault(item => item.Name == "Борщ Український");
-                if (itemToDelete != null)
-                {
-                    MessageBoxResult confirmDelete = MessageBox.Show($"Видалити \"{itemToDelete.Name}\" з меню?", "Підтвердження", MessageBoxButton.YesNo, MessageBoxImage.Question);
-                    if (confirmDelete == MessageBoxResult.Yes)
-                    {
-                        _menuManager.RemoveMenuItem(itemToDelete);
-                        LoadMenuToUI();
-                        MessageBox.Show($"Страва \"{itemToDelete.Name}\" видалена з меню.");
-                        OrderItem orderItemToRemove = _currentOrderReference.Items.FirstOrDefault(oi => oi.Item.Name == itemToDelete.Name);
-                        if (orderItemToRemove != null)
-                        {
-                            _currentOrderReference.Items.Remove(orderItemToRemove);
-                            UpdateOrderSummary();
-                            _parentEditOrderWindow?.DisplayOrderItems();
-                        }
-                    }
-                }
-                else
-                {
-                    MessageBox.Show("Не знайдено страви для видалення (тимчасовий приклад).", "Помилка", MessageBoxButton.OK, MessageBoxImage.Warning);
-                }
-            }
-            else
-            {
-                MessageBox.Show("Меню порожнє. Немає страв для видалення.", "Помилка", MessageBoxButton.OK, MessageBoxImage.Information);
-            }
         }
     }
 }

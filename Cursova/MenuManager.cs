@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Windows.Controls;
 
 namespace Cursova
 {
@@ -34,7 +33,7 @@ namespace Cursova
             return AllMenuItems.Where(item => item.GetCategory() == category).ToList();
         }
 
-        public void AddMenuItem(MenuItemForOrder item)
+        /*public void AddMenuItem(MenuItemForOrder item)
         {
             AllMenuItems.Add(item);
             // !save to files!
@@ -54,6 +53,6 @@ namespace Cursova
                 AllMenuItems[index] = newItem;
                 // !save to files!
             }
-        }
+        }*/
     }
 }

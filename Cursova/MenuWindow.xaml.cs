@@ -14,6 +14,7 @@ namespace Cursova
         private Order _currentOrderReference;
         private EditOrderWindow _parentEditOrderWindow;
         private bool _isNewOrderMode;
+        private Order _originalOrderState;
 
         public List<OrderItem> SelectedOrderItems { get; private set; } = new List<OrderItem>();
 
@@ -31,6 +32,7 @@ namespace Cursova
             _isNewOrderMode = false;
             _currentOrderReference = existingOrder;
             _parentEditOrderWindow = parentWindow;
+            _originalOrderState = DeepCopyOrder(existingOrder);
 
             LoadMenuToUI();
             UpdateOrderSummary();
@@ -69,6 +71,8 @@ namespace Cursova
                 Background = Brushes.White
             };
 
+            StackPanel mainPanel = new StackPanel();
+
             Grid itemGrid = new Grid();
             itemGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
             itemGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
@@ -85,7 +89,6 @@ namespace Cursova
 
             TextBlock descriptionWeightTextBlock = new TextBlock
             {
-
                 Text = $"{item.Description} ({item.WeightGrams}г)",
                 FontSize = 14,
                 Foreground = Brushes.Gray,
@@ -124,12 +127,13 @@ namespace Cursova
                     Content = "Додати",
                     Style = (Style)FindResource("AddButtonMenu"),
                     Tag = item,
-                    Foreground= Brushes.Black,
+                    Foreground = Brushes.Black,
                     Width = 80,
                     Height = 40
                 };
                 addButton.Click += AddToOrderButton_Click;
                 controlPanel.Children.Add(addButton);
+                mainPanel.Children.Add(itemGrid);
             }
             else
             {
@@ -168,16 +172,50 @@ namespace Cursova
                     Background = Brushes.Red,
                     Tag = existingOrderItem,
                     Width = 80,
-                    Height = 40
+                    Height = 40,
+                    Margin = new Thickness(5, 0, 0, 0)
                 };
                 removeButton.Click += RemoveItemFromOrderButton_Click;
                 controlPanel.Children.Add(removeButton);
+
+                TextBox notesTextBox = new TextBox
+                {
+                    Text = existingOrderItem.Notes ?? "",
+                    Height = 50,
+                    FontStyle = FontStyles.Normal,
+                    Foreground = Brushes.Black,
+                    VerticalContentAlignment = VerticalAlignment.Top,
+                    Tag = existingOrderItem,
+                    Padding = new Thickness(5),
+                    TextWrapping = TextWrapping.Wrap,
+                    FontSize = 14,
+                    AcceptsReturn = true
+                };
+                notesTextBox.TextChanged += NotesTextBox_TextChanged;
+                
+                StackPanel notesPanel = new StackPanel
+                {
+                    Margin = new Thickness(0, 5, 0, 0)
+                };
+                
+                TextBlock notesLabel = new TextBlock
+                {
+                    Text = "Примітки:",
+                    FontSize = 12,
+                    Foreground = Brushes.Gray,
+                    Margin = new Thickness(0, 0, 0, 2)
+                };
+                
+                notesPanel.Children.Add(notesLabel);
+                notesPanel.Children.Add(notesTextBox);
+                mainPanel.Children.Add(itemGrid);
+                mainPanel.Children.Add(notesPanel);
             }
 
             Grid.SetColumn(controlPanel, 1);
             itemGrid.Children.Add(controlPanel);
 
-            itemBorder.Child = itemGrid;
+            itemBorder.Child = mainPanel;
             return itemBorder;
         }
 
@@ -310,6 +348,22 @@ namespace Cursova
             OrderSummaryTextBlock.Text = $"В замовленні {totalItems} позицій: {totalCost:C}";
         }
 
+        private Order DeepCopyOrder(Order original)
+        {
+            Order copy = new Order(original.TableNumber)
+            {
+                OrderId = original.OrderId,
+                Status = original.Status
+            };
+
+            foreach (var item in original.Items)
+            {
+                copy.Items.Add(new OrderItem(item.Item, item.Quantity, item.Notes));
+            }
+
+            return copy;
+        }
+
         private void ConfirmSelectionButton_Click(object sender, RoutedEventArgs e)
         {
             if (_isNewOrderMode)
@@ -322,8 +376,28 @@ namespace Cursova
 
         private void CancelButton_Click(object sender, RoutedEventArgs e)
         {
+            if (!_isNewOrderMode && _originalOrderState != null)
+            {
+                _currentOrderReference.Items.Clear();
+                foreach (var item in _originalOrderState.Items)
+                {
+                    _currentOrderReference.Items.Add(new OrderItem(item.Item, item.Quantity, item.Notes));
+                }
+                _parentEditOrderWindow?.DisplayOrderItems();
+            }
+            
             DialogResult = false;
             this.Close();
+        }
+
+        private void NotesTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            TextBox notesTextBox = sender as TextBox;
+            OrderItem orderItem = notesTextBox.Tag as OrderItem;
+            if (orderItem != null)
+            {
+                orderItem.Notes = notesTextBox.Text;
+            }
         }
     }
 }

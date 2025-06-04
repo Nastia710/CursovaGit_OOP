@@ -36,7 +36,7 @@ namespace Cursova
     }
     public class Order
     {
-        private static int _nextOrderId = 0;
+        private static int _nextOrderId = 1;
         public int OrderId { get; set; }
         public int TableNumber { get; set; }
         public OrderStatus Status { get; set; }
@@ -161,30 +161,34 @@ namespace Cursova
                 orderGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
                 orderGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
                 orderGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
-                orderGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
-                orderGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+
+                Grid headerGrid = new Grid();
+                headerGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+                headerGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
 
                 TextBlock statusTextBlock = new TextBlock
                 {
                     Text = $"Замовлення №{order.OrderId} - {GetOrderStatusDisplayName(order.Status)}",
                     FontSize = 16,
                     FontWeight = FontWeights.SemiBold,
-                    Margin = new Thickness(0, 0, 0, 5)
+                    Margin = new Thickness(0, 0, 10, 5)
                 };
-                Grid.SetRow(statusTextBlock, 0);
                 Grid.SetColumn(statusTextBlock, 0);
-                orderGrid.Children.Add(statusTextBlock);
+                headerGrid.Children.Add(statusTextBlock);
 
                 Button threeDotsButton = new Button
                 {
                     Content = "...",
                     Style = (Style)FindResource("ThreeDotsButtonStyle"),
-                    Tag = order
+                    Tag = order,
+                    HorizontalAlignment = HorizontalAlignment.Right
                 };
-                Grid.SetRow(threeDotsButton, 0);
                 Grid.SetColumn(threeDotsButton, 1);
                 threeDotsButton.Click += ThreeDotsButton_Click;
-                orderGrid.Children.Add(threeDotsButton);
+                headerGrid.Children.Add(threeDotsButton);
+
+                Grid.SetRow(headerGrid, 0);
+                orderGrid.Children.Add(headerGrid);
 
                 TextBlock totalCostTextBlock = new TextBlock
                 {
@@ -194,24 +198,39 @@ namespace Cursova
                     Margin = new Thickness(0, 0, 0, 5)
                 };
                 Grid.SetRow(totalCostTextBlock, 1);
-                Grid.SetColumn(totalCostTextBlock, 0);
-                Grid.SetColumnSpan(totalCostTextBlock, 2);
                 orderGrid.Children.Add(totalCostTextBlock);
 
                 StackPanel itemsStackPanel = new StackPanel();
                 foreach (var item in order.Items)
                 {
+                    StackPanel itemPanel = new StackPanel();
+                    
                     TextBlock itemTextBlock = new TextBlock
                     {
                         Text = $"- {item.Item.Name} x{item.Quantity} ({item.TotalPrice:C})",
                         FontSize = 14,
                         Margin = new Thickness(10, 0, 0, 2)
                     };
-                    itemsStackPanel.Children.Add(itemTextBlock);
+                    itemPanel.Children.Add(itemTextBlock);
+
+                    if (!string.IsNullOrWhiteSpace(item.Notes))
+                    {
+                        TextBlock notesTextBlock = new TextBlock
+                        {
+                            Text = $"({item.Notes})",
+                            FontSize = 12,
+                            Foreground = Brushes.DarkGray,
+                            FontStyle = FontStyles.Normal,
+                            Margin = new Thickness(2, 0, 0, 2),
+                            TextWrapping = TextWrapping.Wrap,
+                            MaxWidth = 750
+                        };
+                        itemPanel.Children.Add(notesTextBlock);
+                    }
+
+                    itemsStackPanel.Children.Add(itemPanel);
                 }
                 Grid.SetRow(itemsStackPanel, 2);
-                Grid.SetColumn(itemsStackPanel, 0);
-                Grid.SetColumnSpan(itemsStackPanel, 2);
                 orderGrid.Children.Add(itemsStackPanel);
 
                 orderBorder.Child = orderGrid;
@@ -309,8 +328,11 @@ namespace Cursova
             Button confirmButton = new Button
             {
                 Content = "Підтвердити",
-                Padding = new Thickness(10, 5, 0, 0),
-                Margin = new Thickness(0, 0, 10, 0)
+                Margin = new Thickness(0, 0, 10, 0),
+                HorizontalAlignment = HorizontalAlignment.Center,
+                VerticalAlignment = VerticalAlignment.Center,
+                Width = 78,
+                Height = 25
             };
             confirmButton.Click += (s, e) =>
             {
@@ -332,7 +354,11 @@ namespace Cursova
             Button cancelButton = new Button
             {
                 Content = "Скасувати",
-                Padding = new Thickness(10, 5, 0, 0)
+                Margin = new Thickness(0, 0, 0, 0),
+                HorizontalAlignment = HorizontalAlignment.Center,
+                VerticalAlignment = VerticalAlignment.Center,
+                Width = 78,
+                Height = 25
             };
             cancelButton.Click += (s, e) => changeStatusDialog.Close();
             buttonsPanel.Children.Add(cancelButton);

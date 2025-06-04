@@ -63,7 +63,7 @@
                        Foreground="Black"/>
         </Border>
 
-        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Margin="10,10,10,41">
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Margin="10,10,10,82">
             <StackPanel x:FieldModifier="public" x:Name="OrdersStackPanel">
             </StackPanel>
         </ScrollViewer>

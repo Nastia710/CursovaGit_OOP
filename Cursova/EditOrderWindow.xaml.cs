@@ -69,6 +69,8 @@ namespace Cursova
                     Margin = new Thickness(0, 0, 0, 5)
                 };
 
+                StackPanel mainPanel = new StackPanel();
+
                 Grid itemGrid = new Grid();
                 itemGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
                 itemGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
@@ -105,18 +107,6 @@ namespace Cursova
                     };
                     itemDetailsPanel.Children.Add(allergensTextBlock);
                 }
-                if (!string.IsNullOrEmpty(orderItem.Notes))
-                {
-                    TextBlock notesTextBlock = new TextBlock
-                    {
-                        Text = $"Нотатки: {orderItem.Notes}",
-                        FontSize = 12,
-                        Foreground = Brushes.DarkBlue,
-                        FontStyle = FontStyles.Italic,
-                        Margin = new Thickness(0, 2, 0, 0)
-                    };
-                    itemDetailsPanel.Children.Add(notesTextBlock);
-                }
 
                 Grid.SetColumn(itemDetailsPanel, 0);
                 itemGrid.Children.Add(itemDetailsPanel);
@@ -145,7 +135,6 @@ namespace Cursova
                 };
 
                 quantityTextBox.PreviewTextInput += NumericTextBox_PreviewTextInput;
-
                 quantityTextBox.LostFocus += QuantityTextBox_LostFocus;
                 quantityControlPanel.Children.Add(quantityTextBox);
 
@@ -180,12 +169,47 @@ namespace Cursova
                     VerticalAlignment = VerticalAlignment.Center,
                     Margin = new Thickness(5),
                     Foreground = Brushes.White,
+                    Height = 30,
                 };
                 removeButton.Click += RemoveItemButton_Click;
                 Grid.SetColumn(removeButton, 3);
                 itemGrid.Children.Add(removeButton);
 
-                itemBorder.Child = itemGrid;
+                mainPanel.Children.Add(itemGrid);
+
+                StackPanel notesPanel = new StackPanel
+                {
+                    Margin = new Thickness(0, 5, 0, 0)
+                };
+                
+                TextBlock notesLabel = new TextBlock
+                {
+                    Text = "Примітки:",
+                    FontSize = 12,
+                    Foreground = Brushes.Gray,
+                    Margin = new Thickness(0, 0, 0, 2)
+                };
+                
+                TextBox notesTextBox = new TextBox
+                {
+                    Text = orderItem.Notes ?? "",
+                    Height = 50,
+                    FontStyle = FontStyles.Normal,
+                    Foreground = Brushes.Black,
+                    VerticalContentAlignment = VerticalAlignment.Top,
+                    Tag = orderItem,
+                    Padding = new Thickness(5),
+                    TextWrapping = TextWrapping.Wrap,
+                    FontSize= 14,
+                    AcceptsReturn = true
+                };
+                notesTextBox.TextChanged += NotesTextBox_TextChanged;
+                
+                notesPanel.Children.Add(notesLabel);
+                notesPanel.Children.Add(notesTextBox);
+                mainPanel.Children.Add(notesPanel);
+
+                itemBorder.Child = mainPanel;
                 OrderItemsStackPanel.Children.Add(itemBorder);
             }
             UpdateTotalCost();
@@ -258,10 +282,15 @@ namespace Cursova
             }
         }
 
-        /*private void QuantityTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        private void NotesTextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
-            
-        }*/
+            TextBox notesTextBox = sender as TextBox;
+            OrderItem orderItem = notesTextBox.Tag as OrderItem;
+            if (orderItem != null)
+            {
+                orderItem.Notes = notesTextBox.Text;
+            }
+        }
 
         private void RemoveItemButton_Click(object sender, RoutedEventArgs e)
         {
@@ -286,20 +315,16 @@ namespace Cursova
         {
             MenuWindow menuWindow = new MenuWindow(_currentOrder, this);
             menuWindow.ShowDialog();
-
-
         }
 
         private void SaveChangesButton_Click(object sender, RoutedEventArgs e)
         {
-
             DialogResult = true;
             this.Close();
         }
 
         private void CancelButton_Click(object sender, RoutedEventArgs e)
         {
-
             _currentOrder.Items.Clear();
             foreach (var item in _originalOrderCopy.Items)
             {

@@ -5,6 +5,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Text.Json.Serialization;
+using System.Data;
 
 namespace Cursova
 {
@@ -43,6 +44,7 @@ namespace Cursova
         public OrderStatus Status { get; set; }
         public List<OrderItem> Items { get; set; }
         public decimal TotalCost { get; set; }
+        public DateTime OrderDateTime { get; set; }
 
         [JsonConstructor]
         /*public Order()
@@ -55,7 +57,48 @@ namespace Cursova
             TableNumber = tableNumber;
             Status = OrderStatus.AwaitingConfirmation;
             Items = new List<OrderItem>();
+            OrderDateTime = DateTime.Now;
             CalculateTotalCost();
+        }
+
+        public OrderType GetOrderType()
+        {
+            var currentDateTime = DateTime.Now;
+            var timeDifference = OrderDateTime - currentDateTime;
+
+            if (timeDifference.TotalDays <= -1)
+            {
+                return OrderType.Past;
+            }
+            else if (timeDifference.TotalMinutes >= 30)
+            {
+                return OrderType.Future;
+            }
+            else
+            {
+                return OrderType.Current;
+            }
+        }
+
+        public bool IsValidOrderDateTime()
+        {
+            var currentDateTime = DateTime.Now;
+
+            if (OrderDateTime.Date < currentDateTime.Date)
+            {
+                MessageBox.Show("Неможливо створити замовлення на цю дату, бо вона вже пройшла", 
+                    "Помилка", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return false;
+            }
+            else if (OrderDateTime.Date == currentDateTime.Date && 
+                     OrderDateTime.TimeOfDay < currentDateTime.TimeOfDay)
+            {
+                MessageBox.Show("Неможливо створити замовлення на цей час, бо він вже пройшов", 
+                    "Помилка", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return false;
+            }
+
+            return true;
         }
 
         public void AddItem(OrderItem item)
@@ -74,6 +117,13 @@ namespace Cursova
         {
             TotalCost = Items.Sum(item => item.TotalPrice);
         }
+    }
+
+    public enum OrderType
+    {
+        Current,
+        Future,
+        Past
     }
 
     public partial class TableOrdersWindow : Window
@@ -133,6 +183,20 @@ namespace Cursova
         {
             OrdersStackPanel.Children.Clear();
 
+            var unclosedPastOrders = _orders.Where(order => 
+                order.GetOrderType() == OrderType.Past && 
+                order.Status != OrderStatus.NotConfirmed && 
+                order.Status != OrderStatus.Completed).ToList();
+
+            if (unclosedPastOrders.Any())
+            {
+                foreach (var order in unclosedPastOrders)
+                {
+                    MessageBox.Show($"Замовлення з номером {order.OrderId} не закрите", 
+                        "Увага", MessageBoxButton.OK, MessageBoxImage.Warning);
+                }
+            }
+
             if (_orders.Count == 0)
             {
                 TextBlock noOrdersText = new TextBlock
@@ -159,6 +223,7 @@ namespace Cursova
                 };
 
                 Grid orderGrid = new Grid();
+                orderGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
                 orderGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
                 orderGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
                 orderGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
@@ -191,6 +256,16 @@ namespace Cursova
                 Grid.SetRow(headerGrid, 0);
                 orderGrid.Children.Add(headerGrid);
 
+                TextBlock dateTimeTextBlock = new TextBlock
+                {
+                    Text = $"Дата та час: {order.OrderDateTime:dd.MM.yyyy HH:mm}",
+                    FontSize = 14,
+                    Foreground = Brushes.Black,
+                    Margin = new Thickness(0, 0, 0, 5)
+                };
+                Grid.SetRow(dateTimeTextBlock, 1);
+                orderGrid.Children.Add(dateTimeTextBlock);
+
                 TextBlock totalCostTextBlock = new TextBlock
                 {
                     Text = $"Загальна вартість: {order.TotalCost:C}",
@@ -198,7 +273,7 @@ namespace Cursova
                     FontWeight = FontWeights.Bold,
                     Margin = new Thickness(0, 0, 0, 5)
                 };
-                Grid.SetRow(totalCostTextBlock, 1);
+                Grid.SetRow(totalCostTextBlock, 2);
                 orderGrid.Children.Add(totalCostTextBlock);
 
                 StackPanel itemsStackPanel = new StackPanel();
@@ -231,7 +306,7 @@ namespace Cursova
 
                     itemsStackPanel.Children.Add(itemPanel);
                 }
-                Grid.SetRow(itemsStackPanel, 2);
+                Grid.SetRow(itemsStackPanel, 3);
                 orderGrid.Children.Add(itemsStackPanel);
 
                 orderBorder.Child = orderGrid;
@@ -316,7 +391,21 @@ namespace Cursova
             panel.Children.Add(promptText);
 
             ComboBox statusComboBox = new ComboBox();
-            statusComboBox.ItemsSource = System.Enum.GetValues(typeof(OrderStatus)).Cast<OrderStatus>();
+            var orderType = order.GetOrderType();
+
+            if (orderType == OrderType.Future)
+            {
+                statusComboBox.ItemsSource = new[] { OrderStatus.AwaitingConfirmation, OrderStatus.Confirmed };
+            }
+            else if (orderType == OrderType.Past)
+            {
+                statusComboBox.ItemsSource = new[] { OrderStatus.NotConfirmed, OrderStatus.Completed };
+            }
+            else
+            {
+                statusComboBox.ItemsSource = System.Enum.GetValues(typeof(OrderStatus));
+            }
+
             statusComboBox.SelectedItem = order.Status;
             panel.Children.Add(statusComboBox);
 

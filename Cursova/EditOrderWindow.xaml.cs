@@ -21,6 +21,44 @@ namespace Cursova
             _originalOrderCopy = DeepCopyOrder(orderToEdit);
 
             OrderIdTextBlock.Text = $"Замовлення №{_currentOrder.OrderId}";
+            
+            Grid dateTimeGrid = new Grid();
+            dateTimeGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+            dateTimeGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(10) });
+            dateTimeGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+
+            DatePicker datePicker = new DatePicker
+            {
+                SelectedDate = _currentOrder.OrderDateTime.Date,
+                Width = 150,
+                Margin = new Thickness(10, 0, 0, 0),    
+                VerticalAlignment = VerticalAlignment.Center,
+                HorizontalAlignment = HorizontalAlignment.Center,
+                VerticalContentAlignment = VerticalAlignment.Center,
+            };
+            datePicker.SelectedDateChanged += DatePicker_SelectedDateChanged;
+            Grid.SetColumn(datePicker, 0);
+            dateTimeGrid.Children.Add(datePicker);
+
+            TextBox timeTextBox = new TextBox
+            {
+                Text = _currentOrder.OrderDateTime.ToString("HH:mm"),
+                Width = 70,
+                TextAlignment = TextAlignment.Center,
+                VerticalContentAlignment = VerticalAlignment.Center,
+                HorizontalContentAlignment = HorizontalAlignment.Center,
+            };
+            timeTextBox.TextChanged += TimeTextBox_TextChanged;
+            Grid.SetColumn(timeTextBox, 2);
+            dateTimeGrid.Children.Add(timeTextBox);
+
+            var headerPanel = (Grid)this.FindName("HeaderPanel");
+            if (headerPanel != null)
+            {
+                headerPanel.Children.Add(dateTimeGrid);
+                Grid.SetColumn(dateTimeGrid, 1);
+            }
+
             DisplayOrderItems();
             UpdateTotalCost();
         }
@@ -319,6 +357,11 @@ namespace Cursova
 
         private void SaveChangesButton_Click(object sender, RoutedEventArgs e)
         {
+            if (!_currentOrder.IsValidOrderDateTime())
+            {
+                return;
+            }
+
             DialogResult = true;
             this.Close();
         }
@@ -335,6 +378,27 @@ namespace Cursova
 
             DialogResult = false;
             this.Close();
+        }
+
+        private void DatePicker_SelectedDateChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (sender is DatePicker datePicker && datePicker.SelectedDate.HasValue)
+            {
+                var newDateTime = datePicker.SelectedDate.Value.Date + _currentOrder.OrderDateTime.TimeOfDay;
+                _currentOrder.OrderDateTime = newDateTime;
+            }
+        }
+
+        private void TimeTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (sender is TextBox timeTextBox)
+            {
+                if (TimeSpan.TryParse(timeTextBox.Text, out TimeSpan timeOfDay))
+                {
+                    var newDateTime = _currentOrder.OrderDateTime.Date + timeOfDay;
+                    _currentOrder.OrderDateTime = newDateTime;
+                }
+            }
         }
     }
 }

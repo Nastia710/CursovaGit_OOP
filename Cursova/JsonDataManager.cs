@@ -5,6 +5,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.Encodings.Web;
 using System.Text.Unicode;
+using System.Windows;
 
 namespace Cursova
 {
@@ -37,8 +38,17 @@ namespace Cursova
                 return new List<MenuItemForOrder>();
             }
 
-            var json = File.ReadAllText(_menuFilePath);
-            return JsonSerializer.Deserialize<List<MenuItemForOrder>>(json, _jsonOptions);
+            try
+            {
+                var json = File.ReadAllText(_menuFilePath);
+                return JsonSerializer.Deserialize<List<MenuItemForOrder>>(json, _jsonOptions);
+            }
+            catch (JsonException ex)
+            {
+                MessageBox.Show($"Помилка при завантаженні меню: {ex.Message}", 
+                    "Помилка", MessageBoxButton.OK, MessageBoxImage.Error);
+                return new List<MenuItemForOrder>();
+            }
         }
 
         public void SaveOrders(Dictionary<int, List<Order>> tableOrders)
@@ -54,8 +64,30 @@ namespace Cursova
                 return new Dictionary<int, List<Order>>();
             }
 
-            var json = File.ReadAllText(_ordersFilePath);
-            return JsonSerializer.Deserialize<Dictionary<int, List<Order>>>(json, _jsonOptions);
+            try
+            {
+                var json = File.ReadAllText(_ordersFilePath);
+                var orders = JsonSerializer.Deserialize<Dictionary<int, List<Order>>>(json, _jsonOptions);
+
+                foreach (var tableOrders in orders.Values)
+                {
+                    foreach (var order in tableOrders)
+                    {
+                        if (order.OrderDateTime == default)
+                        {
+                            order.OrderDateTime = DateTime.Now;
+                        }
+                    }
+                }
+
+                return orders;
+            }
+            catch (JsonException ex)
+            {
+                MessageBox.Show($"Помилка при завантаженні замовлень: {ex.Message}", 
+                    "Помилка", MessageBoxButton.OK, MessageBoxImage.Error);
+                return new Dictionary<int, List<Order>>();
+            }
         }
     }
 }

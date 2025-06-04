@@ -115,8 +115,9 @@
         </Grid.RowDefinitions>
 
         <Border Grid.Row="0" Background="#FFD5E8FF" Padding="10">
-            <Grid>
+            <Grid x:Name="HeaderPanel">
                 <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
@@ -127,7 +128,7 @@
                            HorizontalAlignment="Left"
                            VerticalAlignment="Center"
                            Foreground="Black"/>
-                <Button Grid.Column="1"
+                <Button Grid.Column="2"
                         Content="+"
                         FontSize="24"
                         FontWeight="Bold"

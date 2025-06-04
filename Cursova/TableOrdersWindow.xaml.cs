@@ -12,6 +12,7 @@ namespace Cursova
     {
         AwaitingConfirmation,
         Confirmed,
+        NotConfirmed,
         Preparing,
         Ready,
         Completed
@@ -243,9 +244,10 @@ namespace Cursova
             {
                 case OrderStatus.AwaitingConfirmation: return "Очікує підтвердження";
                 case OrderStatus.Confirmed: return "Підтверджено";
+                case OrderStatus.NotConfirmed: return "Не підтверджено";
                 case OrderStatus.Preparing: return "Готується";
                 case OrderStatus.Ready: return "Готове";
-                case OrderStatus.Completed: return "Завершене";
+                case OrderStatus.Completed: return "Закрито";
                 default: return status.ToString();
             }
         }

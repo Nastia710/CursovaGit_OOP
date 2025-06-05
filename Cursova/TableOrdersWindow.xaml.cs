@@ -7,6 +7,7 @@ using System.Windows.Media;
 using System.Text.Json.Serialization;
 using System.Data;
 using System.Windows.Media.Imaging;
+using System.Xml.Linq;
 
 namespace Cursova
 {
@@ -223,7 +224,7 @@ namespace Cursova
                 {
                     newOrder.AddItem(item);
                 }
-                _orders.Add(newOrder);
+                _orders.Insert(0, newOrder);
                 SaveOrders();
                 DisplayOrders();
             }

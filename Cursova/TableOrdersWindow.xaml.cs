@@ -6,6 +6,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Text.Json.Serialization;
 using System.Data;
+using System.Windows.Media.Imaging;
 
 namespace Cursova
 {
@@ -36,6 +37,41 @@ namespace Cursova
         }
         public decimal TotalPrice => Item.Price * Quantity;
     }
+    public abstract class OrderStatusImage
+    {
+        public abstract string GetImagePath();
+    }
+
+    public class AwaitingConfirmationImage : OrderStatusImage
+    {
+        public override string GetImagePath() => @"C:\Users\Lenovo\OneDrive\Робочий стіл\CursovaGit\Cursova\AwaitingConfirmationOrder.png";
+    }
+
+    public class ConfirmedImage : OrderStatusImage
+    {
+        public override string GetImagePath() => @"C:\Users\Lenovo\OneDrive\Робочий стіл\CursovaGit\Cursova\CompletedOrder.png";
+    }
+
+    public class NotConfirmedImage : OrderStatusImage
+    {
+        public override string GetImagePath() => @"C:\Users\Lenovo\OneDrive\Робочий стіл\CursovaGit\Cursova\NotConfirmedOrder.png";
+    }
+
+    public class PreparingImage : OrderStatusImage
+    {
+        public override string GetImagePath() => @"C:\Users\Lenovo\OneDrive\Робочий стіл\CursovaGit\Cursova\PreparingOrder.png";
+    }
+
+    public class ReadyImage : OrderStatusImage
+    {
+        public override string GetImagePath() => @"C:\Users\Lenovo\OneDrive\Робочий стіл\CursovaGit\Cursova\ReadyOrder.png";
+    }
+
+    public class CompletedImage : OrderStatusImage
+    {
+        public override string GetImagePath() => @"C:\Users\Lenovo\OneDrive\Робочий стіл\CursovaGit\Cursova\ConfirmedOrder.png";
+    }
+
     public class Order
     {
         private static int _nextOrderId = 1;
@@ -116,6 +152,20 @@ namespace Cursova
         public void CalculateTotalCost()
         {
             TotalCost = Items.Sum(item => item.TotalPrice);
+        }
+
+        public OrderStatusImage GetStatusImage()
+        {
+            return Status switch
+            {
+                OrderStatus.AwaitingConfirmation => new AwaitingConfirmationImage(),
+                OrderStatus.Confirmed => new ConfirmedImage(),
+                OrderStatus.NotConfirmed => new NotConfirmedImage(),
+                OrderStatus.Preparing => new PreparingImage(),
+                OrderStatus.Ready => new ReadyImage(),
+                OrderStatus.Completed => new CompletedImage(),
+                _ => new AwaitingConfirmationImage()
+            };
         }
     }
 
@@ -229,8 +279,19 @@ namespace Cursova
                 orderGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
 
                 Grid headerGrid = new Grid();
+                headerGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
                 headerGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
                 headerGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+
+                Image statusImage = new Image
+                {
+                    Source = new BitmapImage(new Uri(order.GetStatusImage().GetImagePath())),
+                    Width = 32,
+                    Height = 32,
+                    Margin = new Thickness(0, 0, 10, 0)
+                };
+                Grid.SetColumn(statusImage, 0);
+                headerGrid.Children.Add(statusImage);
 
                 TextBlock statusTextBlock = new TextBlock
                 {
@@ -239,7 +300,7 @@ namespace Cursova
                     FontWeight = FontWeights.SemiBold,
                     Margin = new Thickness(0, 0, 10, 5)
                 };
-                Grid.SetColumn(statusTextBlock, 0);
+                Grid.SetColumn(statusTextBlock, 1);
                 headerGrid.Children.Add(statusTextBlock);
 
                 Button threeDotsButton = new Button
@@ -249,7 +310,7 @@ namespace Cursova
                     Tag = order,
                     HorizontalAlignment = HorizontalAlignment.Right
                 };
-                Grid.SetColumn(threeDotsButton, 1);
+                Grid.SetColumn(threeDotsButton, 2);
                 threeDotsButton.Click += ThreeDotsButton_Click;
                 headerGrid.Children.Add(threeDotsButton);
 

@@ -192,12 +192,12 @@ namespace Cursova
                     AcceptsReturn = true
                 };
                 notesTextBox.TextChanged += NotesTextBox_TextChanged;
-                
+
                 StackPanel notesPanel = new StackPanel
                 {
                     Margin = new Thickness(0, 5, 0, 0)
                 };
-                
+
                 TextBlock notesLabel = new TextBlock
                 {
                     Text = "Примітки:",
@@ -205,7 +205,7 @@ namespace Cursova
                     Foreground = Brushes.Gray,
                     Margin = new Thickness(0, 0, 0, 2)
                 };
-                
+
                 notesPanel.Children.Add(notesLabel);
                 notesPanel.Children.Add(notesTextBox);
                 mainPanel.Children.Add(itemGrid);
@@ -385,7 +385,7 @@ namespace Cursova
                 }
                 _parentEditOrderWindow?.DisplayOrderItems();
             }
-            
+
             DialogResult = false;
             this.Close();
         }

@@ -21,7 +21,7 @@ namespace Cursova
             _originalOrderCopy = DeepCopyOrder(orderToEdit);
 
             OrderIdTextBlock.Text = $"Замовлення №{_currentOrder.OrderId}";
-            
+
             Grid dateTimeGrid = new Grid();
             dateTimeGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
             dateTimeGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(10) });
@@ -31,10 +31,12 @@ namespace Cursova
             {
                 SelectedDate = _currentOrder.OrderDateTime.Date,
                 Width = 150,
-                Margin = new Thickness(10, 0, 0, 0),    
+                Margin = new Thickness(10, 0, 0, 0),
                 VerticalAlignment = VerticalAlignment.Center,
                 HorizontalAlignment = HorizontalAlignment.Center,
                 VerticalContentAlignment = VerticalAlignment.Center,
+                DisplayDateStart = DateTime.Now.Date,
+                DisplayDateEnd = DateTime.Now.AddYears(1)
             };
             datePicker.SelectedDateChanged += DatePicker_SelectedDateChanged;
             Grid.SetColumn(datePicker, 0);
@@ -47,8 +49,45 @@ namespace Cursova
                 TextAlignment = TextAlignment.Center,
                 VerticalContentAlignment = VerticalAlignment.Center,
                 HorizontalContentAlignment = HorizontalAlignment.Center,
+                MaxLength = 5
             };
             timeTextBox.TextChanged += TimeTextBox_TextChanged;
+            timeTextBox.PreviewTextInput += (s, e) =>
+            {
+                if (!char.IsDigit(e.Text[0]) && e.Text[0] != ':')
+                {
+                    e.Handled = true;
+                    return;
+                }
+
+                var textBox = s as TextBox;
+                var futureText = textBox.Text.Insert(textBox.SelectionStart, e.Text);
+
+                if (e.Text == ":" && textBox.Text.Count(c => c == ':') >= 1)
+                {
+                    e.Handled = true;
+                    return;
+                }
+
+                if (futureText.Length > 5)
+                {
+                    e.Handled = true;
+                    return;
+                }
+            };
+
+            timeTextBox.LostFocus += (s, e) =>
+            {
+                if (s is TextBox tb)
+                {
+                    if (tb.Text.Length < 5 || !tb.Text.Contains(":"))
+                    {
+                        MessageBox.Show("Некоректний ввід даних", "Помилка", MessageBoxButton.OK, MessageBoxImage.Error);
+                        tb.Text = DateTime.Now.ToString("HH:mm");
+                    }
+                }
+            };
+
             Grid.SetColumn(timeTextBox, 2);
             dateTimeGrid.Children.Add(timeTextBox);
 
@@ -219,7 +258,7 @@ namespace Cursova
                 {
                     Margin = new Thickness(0, 5, 0, 0)
                 };
-                
+
                 TextBlock notesLabel = new TextBlock
                 {
                     Text = "Примітки:",
@@ -227,7 +266,7 @@ namespace Cursova
                     Foreground = Brushes.Gray,
                     Margin = new Thickness(0, 0, 0, 2)
                 };
-                
+
                 TextBox notesTextBox = new TextBox
                 {
                     Text = orderItem.Notes ?? "",
@@ -238,11 +277,11 @@ namespace Cursova
                     Tag = orderItem,
                     Padding = new Thickness(5),
                     TextWrapping = TextWrapping.Wrap,
-                    FontSize= 14,
+                    FontSize = 14,
                     AcceptsReturn = true
                 };
                 notesTextBox.TextChanged += NotesTextBox_TextChanged;
-                
+
                 notesPanel.Children.Add(notesLabel);
                 notesPanel.Children.Add(notesTextBox);
                 mainPanel.Children.Add(notesPanel);
@@ -384,7 +423,18 @@ namespace Cursova
         {
             if (sender is DatePicker datePicker && datePicker.SelectedDate.HasValue)
             {
-                var newDateTime = datePicker.SelectedDate.Value.Date + _currentOrder.OrderDateTime.TimeOfDay;
+                var selectedDate = datePicker.SelectedDate.Value;
+                var maxDate = DateTime.Now.AddYears(1);
+                
+                if (selectedDate > maxDate)
+                {
+                    MessageBox.Show("Не можна створити замовлення більше, ніж рік вперед", 
+                        "Помилка", MessageBoxButton.OK, MessageBoxImage.Error);
+                    datePicker.SelectedDate = DateTime.Now;
+                    return;
+                }
+
+                var newDateTime = selectedDate.Date + _currentOrder.OrderDateTime.TimeOfDay;
                 _currentOrder.OrderDateTime = newDateTime;
             }
         }
@@ -393,11 +443,43 @@ namespace Cursova
         {
             if (sender is TextBox timeTextBox)
             {
-                if (TimeSpan.TryParse(timeTextBox.Text, out TimeSpan timeOfDay))
+                if (timeTextBox.Text.Length < 5)
+                    return;
+
+                string timeText = timeTextBox.Text.Trim();
+
+                if (!timeText.Contains(":"))
                 {
-                    var newDateTime = _currentOrder.OrderDateTime.Date + timeOfDay;
-                    _currentOrder.OrderDateTime = newDateTime;
+                    MessageBox.Show("Некоректний ввід даних", "Помилка", MessageBoxButton.OK, MessageBoxImage.Error);
+                    timeTextBox.Text = DateTime.Now.ToString("HH:mm");
+                    return;
                 }
+
+                string[] timeParts = timeText.Split(':');
+                if (timeParts.Length != 2)
+                {
+                    MessageBox.Show("Некоректний ввід даних", "Помилка", MessageBoxButton.OK, MessageBoxImage.Error);
+                    timeTextBox.Text = DateTime.Now.ToString("HH:mm");
+                    return;
+                }
+
+                if (!int.TryParse(timeParts[0], out int hours) || !int.TryParse(timeParts[1], out int minutes))
+                {
+                    MessageBox.Show("Некоректний ввід даних", "Помилка", MessageBoxButton.OK, MessageBoxImage.Error);
+                    timeTextBox.Text = DateTime.Now.ToString("HH:mm");
+                    return;
+                }
+
+                if (hours < 0 || hours > 23 || minutes < 0 || minutes > 59)
+                {
+                    MessageBox.Show("Некоректний ввід даних", "Помилка", MessageBoxButton.OK, MessageBoxImage.Error);
+                    timeTextBox.Text = DateTime.Now.ToString("HH:mm");
+                    return;
+                }
+
+                var timeOfDay = new TimeSpan(hours, minutes, 0);
+                var newDateTime = _currentOrder.OrderDateTime.Date + timeOfDay;
+                _currentOrder.OrderDateTime = newDateTime;
             }
         }
     }

@@ -45,7 +45,7 @@ namespace Cursova
             }
             catch (JsonException ex)
             {
-                MessageBox.Show($"Помилка при завантаженні меню: {ex.Message}", 
+                MessageBox.Show($"Помилка при завантаженні меню: {ex.Message}",
                     "Помилка", MessageBoxButton.OK, MessageBoxImage.Error);
                 return new List<MenuItemForOrder>();
             }
@@ -84,7 +84,7 @@ namespace Cursova
             }
             catch (JsonException ex)
             {
-                MessageBox.Show($"Помилка при завантаженні замовлень: {ex.Message}", 
+                MessageBox.Show($"Помилка при завантаженні замовлень: {ex.Message}",
                     "Помилка", MessageBoxButton.OK, MessageBoxImage.Error);
                 return new Dictionary<int, List<Order>>();
             }

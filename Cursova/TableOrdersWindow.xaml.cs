@@ -123,14 +123,14 @@ namespace Cursova
 
             if (OrderDateTime.Date < currentDateTime.Date)
             {
-                MessageBox.Show("Неможливо створити замовлення на цю дату, бо вона вже пройшла", 
+                MessageBox.Show("Неможливо створити замовлення на цю дату, бо вона вже пройшла",
                     "Помилка", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return false;
             }
-            else if (OrderDateTime.Date == currentDateTime.Date && 
+            else if (OrderDateTime.Date == currentDateTime.Date &&
                      OrderDateTime.TimeOfDay < currentDateTime.TimeOfDay)
             {
-                MessageBox.Show("Неможливо створити замовлення на цей час, бо він вже пройшов", 
+                MessageBox.Show("Неможливо створити замовлення на цей час, бо він вже пройшов",
                     "Помилка", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return false;
             }
@@ -234,16 +234,16 @@ namespace Cursova
         {
             OrdersStackPanel.Children.Clear();
 
-            var unclosedPastOrders = _orders.Where(order => 
-                order.GetOrderType() == OrderType.Past && 
-                order.Status != OrderStatus.NotConfirmed && 
+            var unclosedPastOrders = _orders.Where(order =>
+                order.GetOrderType() == OrderType.Past &&
+                order.Status != OrderStatus.NotConfirmed &&
                 order.Status != OrderStatus.Completed).ToList();
 
             if (unclosedPastOrders.Any())
             {
                 foreach (var order in unclosedPastOrders)
                 {
-                    MessageBox.Show($"Замовлення з номером {order.OrderId} не закрите", 
+                    MessageBox.Show($"Замовлення з номером {order.OrderId} не закрите",
                         "Увага", MessageBoxButton.OK, MessageBoxImage.Warning);
                 }
             }
@@ -349,7 +349,7 @@ namespace Cursova
                 foreach (var item in order.Items)
                 {
                     StackPanel itemPanel = new StackPanel();
-                    
+
                     TextBlock itemTextBlock = new TextBlock
                     {
                         Text = $"- {item.Item.Name} x{item.Quantity} ({item.TotalPrice:C})",
@@ -413,8 +413,8 @@ namespace Cursova
                 changeStatusMenuItem.Click += (s, ev) => ShowChangeStatusDialog(clickedOrder);
                 contextMenu.Items.Add(changeStatusMenuItem);
 
-                if (clickedOrder.Status != OrderStatus.Preparing && 
-                    clickedOrder.Status != OrderStatus.Ready && 
+                if (clickedOrder.Status != OrderStatus.Preparing &&
+                    clickedOrder.Status != OrderStatus.Ready &&
                     clickedOrder.Status != OrderStatus.Completed)
                 {
                     MenuItem editOrderMenuItem = new MenuItem { Header = "Редагувати замовлення" };

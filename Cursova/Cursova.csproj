@@ -9,10 +9,34 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Resources\AwaitingConfirmationOrder.png" />
+    <None Remove="Resources\CompletedOrder.png" />
+    <None Remove="Resources\ConfirmedOrder.png" />
+    <None Remove="Resources\NotConfirmedOrder.png" />
+    <None Remove="Resources\PreparingOrder.png" />
+    <None Remove="Resources\ReadyOrder.png" />
     <None Remove="search.png" />
   </ItemGroup>
 
   <ItemGroup>
+    <Resource Include="Resources\AwaitingConfirmationOrder.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Resources\CompletedOrder.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Resources\ConfirmedOrder.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Resources\NotConfirmedOrder.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Resources\PreparingOrder.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Resources\ReadyOrder.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
     <Resource Include="search.png" />
   </ItemGroup>
 

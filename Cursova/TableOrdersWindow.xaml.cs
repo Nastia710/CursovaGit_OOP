@@ -45,32 +45,32 @@ namespace Cursova
 
     public class AwaitingConfirmationImage : OrderStatusImage
     {
-        public override string GetImagePath() => @"C:\Users\Lenovo\OneDrive\Робочий стіл\CursovaGit\Cursova\AwaitingConfirmationOrder.png";
+        public override string GetImagePath() => "pack://application:,,,/Cursova;component/Resources/AwaitingConfirmationOrder.png";
     }
 
     public class ConfirmedImage : OrderStatusImage
     {
-        public override string GetImagePath() => @"C:\Users\Lenovo\OneDrive\Робочий стіл\CursovaGit\Cursova\CompletedOrder.png";
+        public override string GetImagePath() => "pack://application:,,,/Cursova;component/Resources/ConfirmedOrder.png";
     }
 
     public class NotConfirmedImage : OrderStatusImage
     {
-        public override string GetImagePath() => @"C:\Users\Lenovo\OneDrive\Робочий стіл\CursovaGit\Cursova\NotConfirmedOrder.png";
+        public override string GetImagePath() => "pack://application:,,,/Cursova;component/Resources/NotConfirmedOrder.png";
     }
 
     public class PreparingImage : OrderStatusImage
     {
-        public override string GetImagePath() => @"C:\Users\Lenovo\OneDrive\Робочий стіл\CursovaGit\Cursova\PreparingOrder.png";
+        public override string GetImagePath() => "pack://application:,,,/Cursova;component/Resources/PreparingOrder.png";
     }
 
     public class ReadyImage : OrderStatusImage
     {
-        public override string GetImagePath() => @"C:\Users\Lenovo\OneDrive\Робочий стіл\CursovaGit\Cursova\ReadyOrder.png";
+        public override string GetImagePath() => "pack://application:,,,/Cursova;component/Resources/ReadyOrder.png";
     }
 
     public class CompletedImage : OrderStatusImage
     {
-        public override string GetImagePath() => @"C:\Users\Lenovo\OneDrive\Робочий стіл\CursovaGit\Cursova\ConfirmedOrder.png";
+        public override string GetImagePath() => "pack://application:,,,/Cursova;component/Resources/CompletedOrder.png";
     }
 
     public class Order

@@ -32,27 +32,5 @@ namespace Cursova
         {
             return AllMenuItems.Where(item => item.GetCategory() == category).ToList();
         }
-
-        /*public void AddMenuItem(MenuItemForOrder item)
-        {
-            AllMenuItems.Add(item);
-            // !save to files!
-        }
-
-        public void RemoveMenuItem(MenuItemForOrder item)
-        {
-            AllMenuItems.Remove(item);
-            // !save to files!
-        }
-
-        public void UpdateMenuItem(MenuItemForOrder oldItem, MenuItemForOrder newItem)
-        {
-            int index = AllMenuItems.IndexOf(oldItem);
-            if (index != -1)
-            {
-                AllMenuItems[index] = newItem;
-                // !save to files!
-            }
-        }*/
     }
 }

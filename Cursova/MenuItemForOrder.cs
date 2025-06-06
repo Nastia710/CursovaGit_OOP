@@ -8,12 +8,17 @@ namespace Cursova
     [JsonDerivedType(typeof(Dessert), typeDiscriminator: "Dessert")]
     public abstract class MenuItemForOrder
     {
-        public string Name { get; set; }
-        public decimal Price { get; set; }
-        public string Description { get; set; }
-        public double WeightGrams { get; set; }
-        public List<string> Allergens { get; set; } = new List<string>();
+        private string name;
+        private decimal price;
+        private string description;
+        private double weightGrams;
+        private List<string> allergens = new List<string>();
 
+        public string Name { get => name; set => name = value; }
+        public decimal Price { get => price; set => price = value; }
+        public string Description { get => description; set => description = value; }
+        public double WeightGrams { get => weightGrams; set => weightGrams = value; }
+        public List<string> Allergens { get => allergens; set => allergens = value; }
         [JsonConstructor]
         public MenuItemForOrder()
         {

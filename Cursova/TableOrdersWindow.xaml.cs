@@ -22,9 +22,13 @@ namespace Cursova
     }
     public class OrderItem
     {
-        public MenuItemForOrder Item { get; set; }
-        public int Quantity { get; set; }
-        public string Notes { get; set; }
+        private int quantity;
+        private MenuItemForOrder item;
+        private string notes;
+
+        public MenuItemForOrder Item { get => item; set => item = value; }
+        public int Quantity { get => quantity; set => quantity = value; }
+        public string Notes { get => notes; set => notes = value; }
 
         [JsonConstructor]
         /*public OrderItem()
@@ -76,12 +80,19 @@ namespace Cursova
     public class Order
     {
         private static int _nextOrderId = 1;
-        public int OrderId { get; set; }
-        public int TableNumber { get; set; }
-        public OrderStatus Status { get; set; }
-        public List<OrderItem> Items { get; set; }
-        public decimal TotalCost { get; set; }
-        public DateTime OrderDateTime { get; set; }
+        private int orderId;
+        private int tableNumber;
+        private OrderStatus status;
+        private List<OrderItem> items;
+        private decimal totalCost;
+        private DateTime orderDateTime;
+
+        public int OrderId { get => orderId; set => orderId = value; }
+        public int TableNumber { get => tableNumber; set => tableNumber = value; }
+        public OrderStatus Status { get => status; set => status = value; }
+        public List<OrderItem> Items { get => items; set => items = value; }
+        public decimal TotalCost { get => totalCost; set => totalCost = value; }
+        public DateTime OrderDateTime { get => orderDateTime; set => orderDateTime = value; }
 
         [JsonConstructor]
         /*public Order()
@@ -422,9 +433,9 @@ namespace Cursova
                     contextMenu.Items.Add(editOrderMenuItem);
                 }
 
-                MenuItem deleteOrderMenuItem = new MenuItem { Header = "Видалити замовлення" };
+                /*MenuItem deleteOrderMenuItem = new MenuItem { Header = "Видалити замовлення" };
                 deleteOrderMenuItem.Click += (s, ev) => DeleteOrder(clickedOrder);
-                contextMenu.Items.Add(deleteOrderMenuItem);
+                contextMenu.Items.Add(deleteOrderMenuItem);*/
 
                 contextMenu.IsOpen = true;
             }
@@ -471,7 +482,7 @@ namespace Cursova
 
             if (orderType == OrderType.Future)
             {
-                statusComboBox.ItemsSource = new[] { OrderStatus.AwaitingConfirmation, OrderStatus.Confirmed };
+                statusComboBox.ItemsSource = new[] { OrderStatus.AwaitingConfirmation, OrderStatus.Confirmed, OrderStatus.NotConfirmed };
             }
             else if (orderType == OrderType.Past)
             {
